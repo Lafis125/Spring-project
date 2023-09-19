@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ikeo.qna.mapper.QnaMapper">
+	<select id="list" resultType="com.ikeo.qna.vo.QnaVO">
+		SELECT no, item_no, title, id, content, writeDate
+		FROM (
+		SELECT rownum rnum, no, item_no, title, content, id, writeDate
+		FROM (
+		SELECT q.no, p.item_no, q.title, q.content, m.id, q.writeDate
+		FROM qna q, member m, product_item p
+		WHERE (q.id = m.id) AND (q.item_no = p.item_no)
+
+		<!-- IF=TEST -->
+		<if test="item_No != null and item_No != ''">
+			AND p.item_no = #{item_No}
+		</if>
+		<!-- END -->
+
+		ORDER BY no DESC
+		)
+		)
+		WHERE rnum BETWEEN 1 AND 10
+	</select>
+
+	<select id="getTotalRow" resultType="Long">
+		select count(*)
+		from qna
+		<!-- IF=TEST -->
+		<if test="item_No != null">
+			WHERE item_no = #{item_No}
+		</if>
+		<!-- END -->
+	</select>
+
+	<select id="view" resultType="com.ikeo.qna.vo.QnaVO">
+		select q.no, p.item_no, q.title, q.content, m.id, q.writeDate
+		from qna q,
+		member m, product_item p
+		where no = #{no} and ( q.id = m.id ) and (q.item_no = p.item_no)
+	</select>
+
+	<insert id="write">
+		<selectKey keyProperty="no" resultType="Long" order="BEFORE">
+			select qna_seq.nextval
+			from dual
+		</selectKey>
+		insert into qna(no, item_No, title, content, id)
+		values(#{no},#{item_No}, #{title}, #{content}, #{id})
+	</insert>
+
+	<update id="update">
+		update qna
+		set title = #{title}, content = #{content}
+		where no = #{no} and id = #{id}
+	</update>
+
+	<delete id="delete">
+		delete from qna
+		where no = #{no}
+	</delete>
+
+
+
+</mapper>

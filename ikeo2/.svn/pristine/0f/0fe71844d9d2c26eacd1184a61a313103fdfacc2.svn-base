@@ -1,0 +1,170 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>회원가입</title>
+<link rel="stylesheet" href="/resources/css/member.css">
+<script src="/resources/js/regEx.js?v=5"></script>
+<style type="text/css">
+#hidePwBtn {
+	display: none;
+}
+</style>
+<script type="text/javascript">
+	// 아이디 중복 체크
+	function checkIdFunc() {
+		checkId($("#id").val());
+	}
+
+	// 닉네임 중복 체크
+	function checkNicknameFunc() {
+		checkNickname($("#nickname").val());
+	}
+
+	// 비밀번호 유효성 검사
+	function checkPwFunc() {
+		checkPw($("#pw").val());
+	}
+
+	// 이름 유효성 검사
+	function checkNameFunc() {
+		checkName($("#name").val());
+	}
+
+	// 전화번호 유효성 검사
+	function checkTelFunc() {
+		checkTel($("#tel").val());
+	}
+
+	// 이메일 유효성 검사
+	function checkEmailFunc() {
+		checkEmail($("#email").val(), $("#domain").val());
+	}
+
+// 0 : 비밀번호 안보이게 설정
+// 1 : 비밀번호 보이게 설정
+let showPwToggle = 0;
+	$(function() {
+		$("#showPwBtn").click(function() {
+			// 비밀번호 안보이는 상태 -> 보이는 상태로 변경
+			if(showPwToggle == 0) {
+				$("#showPwIcon").removeClass("glyphicon-eye-open");
+				$("#showPwIcon").addClass("glyphicon-eye-close");
+				$("#pw").attr("type", "text");
+				showPwToggle = 1;
+			// 비밀번호 보이는 상태 -> 안보이는 상태로 변경
+			} else {
+				$("#showPwIcon").removeClass("glyphicon-eye-close");
+				$("#showPwIcon").addClass("glyphicon-eye-open");
+				$("#pw").attr("type", "password");
+				showPwToggle = 0;
+			}
+		});
+		// 이메일 도메인 선택 시
+		$("#domain-selector").change(function() {
+			let domain = $("#domain-selector").val();
+			if (domain == '') {
+				$("#domain").removeAttr("readonly");
+			} else {
+				$("#domain").attr("readonly", "readonly");
+			}
+			$("#domain").val(domain);
+		});
+	});
+</script>
+</head>
+<body>
+	<div class="col-md-2"></div>
+	<div class="col-md-8">
+		<div id="box-large">
+			<h2>회원가입</h2>
+			<form action="register.do" method="post">
+				<div class="form-group input-group items-lg" id="form-id">
+					<input type="text" name="id" id="id" class="form-control" required
+						maxlength="20" placeholder="아이디를 입력해주세요">
+					<div class="input-group-btn">
+						<button type="button" class="btn btn-primary"
+							onclick="checkIdFunc();">아이디 확인</button>
+					</div>
+				</div>
+				<div class="form-group items-lg-check">
+					<div id="checkId"></div>
+				</div>
+
+				<div class="input-group items-lg" id="form-pw">
+					<input type="password" name="pw" id="pw" class="form-control"
+					required maxlength="20" placeholder="비밀번호를 입력해주세요" onkeyup="checkPwFunc();">
+					<div class="input-group-btn">
+						<button class="btn btn-default" id="showPwBtn" type="button">
+							<i class="glyphicon glyphicon-eye-open" id="showPwIcon"></i>
+						</button>
+					</div>
+				</div>
+				<div class="form-group items-lg-check">
+					<div id="checkPw"></div>
+				</div>
+				
+				<div class="form-group items-lg" id="form-name">
+					<input type="text" name="name" id="name" class="form-control" required onkeyup="checkNameFunc();"
+					placeholder="이름을 입력해주세요">
+				</div>
+				<div class="form-group items-lg-check">
+					<div id="checkName"></div>
+				</div>
+				
+				<div class="form-group input-group items-lg" id="form-nickname">
+					<input type="text" name="nickname" id="nickname"
+						class="form-control" required placeholder="닉네임을 입력해주세요">
+					<div class="input-group-btn">
+					<button type="button" class="btn btn-primary"
+						onclick="checkNicknameFunc();">닉네임 확인</button>
+					</div>
+				</div>
+				<div class="form-group items-lg-check">
+					<div id="checkNickname"></div>
+				</div>
+
+				<div class="form-group items-lg" id="form-tel">
+					<input type="tel" name="tel" id="tel" class="form-control" required placeholder="전화번호를 입력해주세요"
+					onkeyup="checkTelFunc();" maxlength="13">
+				</div>
+				<div class="form-group items-lg-check">
+					<div id="checkTel"></div>
+				</div>
+
+				<div class="form-inline items-lg">
+					<div class="input-group" id="form-email">
+						<input type="text" name="email" id="email" class="form-control" required placeholder="이메일을 입력해주세요"
+						onkeyup="checkEmailFunc();">
+						<span class="input-group-addon">@</span>
+					</div>
+					<div class="form-group" id="form-domain">
+						<input type="text" name="domain" id="domain" class="form-control" required placeholder="도메인을 입력해주세요"
+						onkeyup="checkEmailFunc();">
+					</div>
+					<div class="form-group">
+						<select class="form-control" id="domain-selector">
+							<option value="" selected>직접입력</option>
+							<option value="naver.com">naver.com</option>
+							<option value="gmail.com">gmail.com</option>
+							<option value="hanmail.net">hanmail.net</option>
+							<option value="outlook.com">outlook.com</option>
+							<option value="hotmail.com">hotmail.com</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group items-lg-check">
+					<div id="checkEmail"></div>
+				</div>
+
+				<div class="items-button">
+					<button type="submit" class="btn btn-primary btn-lg">회원가입</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="col-md-2"></div>
+</body>
+</html>

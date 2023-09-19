@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.ikeo.member.ajax.mapper.MemberAjaxMapper">
+	
+	<!-- 아이디 중복 체크 -->
+	<select id="checkId" resultType="Integer">
+		select count(*)
+		from member
+		where id = #{id}
+	</select>
+	
+	<!-- 닉네임 중복 체크 -->
+	<select id="checkNickname" resultType="Integer">
+		select count(*)
+		from member
+		where nickname = #{nickname}
+	</select>
+	
+	<!-- 회원 리스트 -->
+	<select id="list" resultType="com.ikeo.member.vo.MemberVO">
+		select id, nickname, name, email, birth, tel, grade_no, grade_name, reg_date, con_date, status
+		from(
+			select rownum rno, id, nickname, name, email, birth, tel, grade_no, grade_name, reg_date, con_date, status
+			from(
+				select m.id, m.nickname, m.name, m.email, m.birth, m.tel, m.grade_no, g.grade_name, m.reg_date, m.con_date, m.status
+				from member m, grade g
+				where 
+				<include refid="search" />
+				(m.grade_no = g.grade_no)
+				order by id asc
+			)
+		)
+		where rno between 1 and #{endRno}
+	</select>
+	
+	<!-- 검색어 처리 쿼리 -->
+	<sql id="search">
+		<if test="word != null and word != ''">
+			(1=0
+			<if test="key.indexOf('id') >= 0">
+				or id like '%' || #{word} || '%'
+			</if>
+			<if test="key.indexOf('name') >= 0">
+				or name like '%' || #{word} || '%'
+			</if>
+			<if test="key.indexOf('nick') >= 0">
+				or nickname like '%' || #{word} || '%'
+			</if>
+			) and
+		</if>
+	</sql>
+	
+	<!-- 아이디 찾기 -->
+	<select id="findId" resultType="String">
+		select id
+		from member
+		where name = #{name} and tel = #{tel}
+	</select>
+	
+	<!-- 비밀번호 찾기 -->
+	<select id="findPw" resultType="Integer">
+		select count(*)
+		from member
+		where id = #{id} and tel = #{tel}
+	</select>
+	
+	<!-- 관리자 - 등급 변경 -->
+	<update id="changeGrade">
+		update member set grade_no = #{grade_no}
+		where id = #{id}
+	</update>
+	
+	<!-- 관리자 - 상태 변경 -->
+	<update id="changeStatus">
+		update member set status = #{status}
+		where id = #{id}
+	</update>
+	
+	<!-- 관리자 - 판매자 신청 승인 -->
+	<update id="acceptApply">
+		update member set grade_no = '7'
+		where id = #{id}
+	</update>
+	
+	<!-- 관리자 - 판매자 신청 취소 -->
+	<update id="cancelApply">
+		update member set grade_no = '1'
+		where id = #{id}
+	</update>
+</mapper>

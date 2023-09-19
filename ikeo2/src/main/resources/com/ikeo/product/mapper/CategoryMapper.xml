@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ikeo.product.mapper.CategoryMapper">
+	<select id="list" resultType="com.ikeo.product.vo.ProductVO">
+		select category_no, category_name
+		from product_category order by category_no asc
+	</select>
+
+	<select id="Mainlist" resultType="com.ikeo.product.vo.ProductVO">
+		select item_no, item_title,
+		item_thum, item_status,
+		item_price from(select rownum rnum, item_no,
+		item_title, item_thum, item_status,
+		item_price from(
+		select p.item_no,
+		p.item_title, p.item_thum, p.item_status, c.category_no,
+		p.item_price
+		from product_item p, product_category c
+		where p.category_no =
+		#{category_no} and (c.category_no = p.category_no)
+		order by p.item_no
+		desc
+		)
+		)
+		where rnum between 1 and 5
+	</select>
+</mapper>

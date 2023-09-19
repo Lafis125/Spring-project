@@ -1,0 +1,91 @@
+package com.ikeo.event.ajax.controller;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.ikeo.eventReply.service.EventReplyService;
+import com.ikeo.eventReply.vo.EventReplyVO;
+import com.ikeo.member.vo.LoginVO;
+import com.webjjang.util.page.ReplyPageObject;
+
+import lombok.Data;
+
+@RestController
+@RequestMapping("/eventAjax")
+@Data
+public class EventAjaxController {
+
+	@Autowired
+	@Qualifier("eventReplyServiceImpl")
+	private EventReplyService eventReplyService;
+	
+	@GetMapping(value="/list.do", produces = "application/text; charset=utf-8")
+	public List<EventReplyVO> replyList(HttpServletRequest request, Model model,String query) throws Exception{
+		System.out.println("이벤트 댓글 리스트 뿌리기 슛~~!~!");
+		ReplyPageObject replyPageObject = new ReplyPageObject(request);
+		System.out.println("EventAjaxController - replyPageObject" + replyPageObject + " / query : " + query);
+		List<EventReplyVO> list = eventReplyService.replyList(replyPageObject);
+		model.addAttribute("replyPageObject", replyPageObject);
+		return list;
+	}
+	
+	@GetMapping(value="/write.do", produces = "application/text; charset=utf-8")
+	public ResponseEntity<String> replyWrite(EventReplyVO vo, HttpSession session) {
+		vo.setReply_id(((LoginVO)session.getAttribute("login")).getId());
+		
+		System.out.println("EventAjaxController.vo - "+ vo);
+		Integer result = eventReplyService.write(vo);
+
+		if (result == 1)
+			return new ResponseEntity<String>("1", HttpStatus.OK);
+		else
+			return new ResponseEntity<String>("0", HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	@RequestMapping(value = "/update.do", method=RequestMethod.GET)
+	public String replyUpdate(EventReplyVO vo, HttpSession session) {
+		vo.setReply_id(((LoginVO)session.getAttribute("login")).getId());
+		System.out.println("replyUpdate.vo : " + vo);
+		Integer result = eventReplyService.update(vo);
+		
+		if(result == 1) return "1";
+			else return "0";
+	}
+	
+	@RequestMapping(value = "/delete.do", method=RequestMethod.GET)
+	public String replyDelete(EventReplyVO vo, HttpSession session) {
+		vo.setReply_id(((LoginVO)session.getAttribute("login")).getId());
+		Integer result = eventReplyService.delete(vo);
+		
+		if(result == 1) return "1";
+		else return "0";
+	}
+	
+	@GetMapping(value="/answerWrite.do", produces = "application/text; charset=utf-8")
+	public ResponseEntity<String> replyAnswer(EventReplyVO vo, HttpSession session, HttpServletRequest request) {
+		vo.setOrd_no(Long.parseLong(request.getParameter("ord_no"))+1);
+		vo.setPar_no(vo.getRno());
+		vo.setReply_id(((LoginVO)session.getAttribute("login")).getId());
+		
+		System.out.println("EventAjaxController.replyAnswer().vo - "+ vo);
+		Integer result = eventReplyService.answer(vo);
+
+		if (result == 1)
+			return new ResponseEntity<String>("1", HttpStatus.OK);
+		else
+			return new ResponseEntity<String>("0", HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+}

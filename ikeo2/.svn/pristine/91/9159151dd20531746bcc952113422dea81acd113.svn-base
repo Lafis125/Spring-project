@@ -1,0 +1,23 @@
+package com.ikeo.cart.vo;
+
+import lombok.Data;
+
+@Data
+public class CartListVO {
+	
+	private int cartNo;
+	private int itemNo;
+	private int option_no;
+	private int item_no;
+	private int cnt;
+	private String id;
+	private int allPrice;
+	private String item_price;
+	private String item_title;
+	private String item_thum;
+	private String option_price;
+	private String option_info;
+	private String option_name;
+	private String[] option_nos;
+	private String[] cnts;
+}

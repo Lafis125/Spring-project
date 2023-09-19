@@ -1,0 +1,5 @@
+package com.ikeo.communityRecommend.service;
+
+public interface CommunityRecommendService {
+
+}

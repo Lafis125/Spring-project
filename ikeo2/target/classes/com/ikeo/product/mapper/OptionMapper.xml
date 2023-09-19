@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ikeo.product.mapper.OptionMapper">
+	<select id="list" resultType="com.ikeo.product.vo.ProductVO">
+		select o.option_no, o.option_name,
+		o.option_price, o.option_info, p.item_no
+		from product_option o,
+		product_item p
+		where (o.item_no = p.item_no) and p.item_no=#{item_no}
+		order by option_no desc
+	</select>
+
+	<insert id="write">
+		insert into product_option (option_no, option_name,
+		option_price, option_info, item_no)
+		VALUES(product_option_seq.nextval,
+		#{option_name}, #{option_price}, #{option_info}, #{item_no})
+	</insert>
+
+	<update id="update">
+		update product_option set option_name =
+		#{option_name},
+		option_price=#{option_price},
+		option_info=#{option_info} where option_no = #{option_no}
+	</update>
+
+</mapper>

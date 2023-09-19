@@ -1,0 +1,134 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>판매자 관리 페이지</title>
+<link rel="stylesheet" href="/resources/css/member.css">
+<script type="text/javascript">
+$(function(){
+	let grade_no = ${((empty param.grade_no) ? 0 : param.grade_no)};
+	if(grade_no == 0) {
+		$("#a").addClass("active");
+	}
+	else if(grade_no == 6) {
+		$("#b").addClass("active");
+	}
+	else {
+		$("#c").addClass("active");
+	}
+
+});
+
+function ok(obj) {
+	let tr = $(obj).closest("tr");
+	let id = $(tr).find(".id").text();
+	let grade_no = $(tr).data("gradeno");
+	if(confirm("정말로 [" + id + "] 님의 판매자 신청을 승인하시겠습니까?")) {
+		$.ajax({
+			url : "/memberAjax/acceptApply.action",
+			type : 'POST',
+			data : {
+				id : id,
+				grade_no : grade_no
+			},
+			success : function(data) {
+				let result = data;
+				if(result == 1) {
+					// 판매자 신청 승인 성공
+					location.reload();
+					alert("판매자 신청이 승인되었습니다");
+				}
+				else {
+					// 판매자 신청 승인 실패
+				}
+			},
+			error : function() {
+				// ajax 오류
+			}
+		});
+	}
+}
+
+function cancel(obj) {
+	let tr = $(obj).closest("tr");
+	let id = $(tr).find(".id").text();
+	let grade_no = $(tr).data("gradeno");
+	if(confirm("정말로 [" + id + "] 님의 판매자 신청을 취소하시겠습니까?")) {
+		$.ajax({
+			url : "/memberAjax/cancelApply.action",
+			type : 'POST',
+			data : {
+				id : id,
+				grade_no : grade_no
+			},
+			success : function(data) {
+				let result = data;
+				if(result == 1) {
+					// 판매자 신청 승인 취소
+					location.reload();
+					alert("판매자 신청이 취소되었습니다");
+				}
+				else {
+					// 판매자 신청 승인 취소 실패
+				}
+			},
+			error : function() {
+				// ajax 오류
+			}
+		});
+	}
+}
+</script>
+</head>
+<body>
+	<ul class="nav nav-pills" id="tab">
+		<li id="a"><a href="list.do?grade_no=0">전체</a></li>
+		<li id="b"><a href="list.do?grade_no=6">승인 대기</a></li>
+		<li id="c"><a href="list.do?grade_no=7">판매자</a></li>
+	</ul>
+	<pre class="pre-scrollable">
+		<table class="table table-bordered">
+			<thead>
+				<tr>
+					<th>사업자 번호</th>
+					<th>아이디</th>
+					<th>등급</th>
+					<th>사업장 이름</th>
+					<th>사업장 번호</th>
+					<th>사업장 주소</th>
+					<th colspan="2">사업장 상세주소</th>
+				</tr>
+			</thead>
+			<tbody>
+				<c:if test="${empty list }">
+					<tr>
+						<td colspan="7">표시할 데이터가 없습니다</td>
+					</tr>
+				</c:if>
+				<c:if test="${!empty list }">
+					<c:forEach var="vo" items="${list }">
+						<tr data-gradeno=${vo.grade_no }>
+							<td>${vo.company_no }</td>
+							<td class="id">${vo.id }</td>
+							<td>${vo.grade_name }</td>
+							<td>${vo.company_name }</td>
+							<td>${vo.company_tel }</td>
+							<td>${vo.company_addr }</td>
+							<c:if test="${vo.grade_no == 6}">
+								<td>${vo.company_detail_addr }</td>
+								<td><button type="button" onclick="ok(this);">O</button><button type="button" onclick="cancel(this);">X</button></td>
+							</c:if>
+							<c:if test="${vo.grade_no == 7 }">
+								<td colspan="2">${vo.company_detail_addr }</td>
+							</c:if>
+						</tr>
+					</c:forEach>
+				</c:if>
+			</tbody>
+		</table>
+	</pre>
+</body>
+</html>

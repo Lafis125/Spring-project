@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ikeo.order.mapper.OrderMapper">
+	<select id="list" resultType="com.ikeo.order.vo.OrderVO">
+		select
+		orderNo, id, buyUser,
+		addres1, addres2, addres3,
+		phone, allPrice, orderDate from orders
+		where id = #{id}
+	</select>
+	<insert id="write">
+		insert into orders(orderNo, id, buyUser, addres1, addres2, addres3, phone,
+		allPrice, request)
+		values(#{orderNo}, #{id}, #{buyUser}, #{addres1}, #{addres2}, #{addres3}, #{phone},
+		#{allPrice}, #{request})
+	</insert>
+	<insert id="detail">
+		insert into orders_detail(order_detailNo, orderNo, itemNo, cnt)
+		select orders_detail_seq.nextval, #{orderNo}, itemNo, cnt from cart
+	</insert>
+	<delete id="cartDelete">
+		delete from cart
+		where id = #{id}
+	</delete>
+</mapper>

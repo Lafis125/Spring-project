@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ikeo.event.mapper.EventMapper">
+	<select id="list" resultType="com.ikeo.event.vo.EventVO">
+		select no, title, id, write_date, start_date, end_date, update_date ,file_name
+		from(
+			select rownum rnum, no, title, id, write_date, start_date, end_date, update_date ,file_name
+			from(
+				select no, title, id, write_date, start_date, end_date, update_date,
+				(select file_name
+				from event_image ei
+				where e.no = ei.no and pr = 1)file_name,
+				 CASE
+                     WHEN sysdate BETWEEN e.start_date AND e.end_date THEN 1 -- 현재 진행중인 이벤트
+                 END AS event_order
+				from event e
+				<include refid="search"/>
+				order by event_order,no desc
+			)
+		)
+		where rnum between #{startRow} and #{endRow}
+		
+	</select>
+		<select id="getTotalRow" resultType="Long">
+		select count(*) 
+		from event
+		<include refid="search"/>
+	</select>
+	
+	<sql id="search">
+		<!-- 검색이 필요한 경우 -->
+		<if test="word != null and word != ''">
+			where 1 = 0 
+				<if test="key.indexOf('t') >= 0">
+					or title like '%' || #{word} || '%'
+				</if>
+				<if test="key.indexOf('c') >= 0">
+					or content like '%' || #{word} || '%'
+				</if>
+		</if>
+	</sql>
+	
+	<select id="view" resultType="com.ikeo.event.vo.EventVO">
+		select no, title, content, id, write_date, start_date, end_date
+		from event
+		where no = #{no}
+	</select>
+	
+	<select id="getImageFile" resultType="com.ikeo.event.vo.EventImageVO">
+		select image_no, file_name, pr
+		from event_image
+		where no = #{no}
+		order by pr desc, image_no
+	</select>
+	
+	<insert id="write">
+		<selectKey keyProperty="no" resultType="Long" order="BEFORE">
+			select event_seq.nextval
+			from dual
+		</selectKey>
+		
+		insert into event(no, title, content, id, start_date, end_date)
+		values(#{no}, #{title}, #{content}, #{id}, #{start_date}, #{end_date})
+	</insert>
+		
+	<!-- 이미지 파일 정보 저장 ImageVO.no -> ImageFileVO.no -->
+	<insert id="writeFile">
+		insert into event_image(image_no, no, file_name, pr)
+		values(event_image_seq.nextval, #{no}, #{file_name}, #{pr})
+	</insert>
+	
+	<update id="update">
+		update event set title = #{title}, content = #{content}, start_date = #{start_date}, end_date = #{end_date}
+		where no = #{no} and id = #{id}
+	</update>
+	
+	<update id="changeImage">
+		update event_image
+		set file_name = #{file_name}
+		where image_no = #{image_no}
+	</update>
+	
+	<delete id="deleteImage">
+		delete from event_image ef
+		where image_no = #{image_no} and (select e.id from event e where ef.no = e.no) = #{id} and pr != 1
+	</delete>
+	
+	<delete id="delete">
+		delete from event 
+		where no = #{no} and id = #{id}
+	</delete>
+	
+	<insert id="detailImageWrite">
+		<if test="pr == 0">
+			insert into event_image(image_no, no, file_name, pr)
+			values(event_image_seq.nextval, #{no}, #{file_name}, #{pr})
+		</if>
+	</insert>
+</mapper>

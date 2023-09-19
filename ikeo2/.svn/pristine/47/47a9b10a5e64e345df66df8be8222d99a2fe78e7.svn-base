@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ikeo.member.mapper.MemberMapper">
+	
+	<!-- 로그인 -->
+	<select id="login" resultType="com.ikeo.member.vo.LoginVO">
+		select m.id, m.nickname, m.grade_no, g.grade_name, m.status
+		from member m, grade g
+		where m.id = #{id} and m.pw = #{pw} and (m.grade_no = g.grade_no)
+	</select>
+	
+	<!-- 최근 접속일 갱신 -->
+	<update id="updateConDate">
+		update member set con_date = sysdate
+		where id = #{id}
+	</update>
+	
+	<!-- 회원가입 -->
+	<insert id="register">
+		insert into member(id, pw, name, nickname, tel, email)
+		values(#{id}, #{pw}, #{name}, #{nickname}, #{tel}, #{email})
+	</insert>
+	
+	<!-- 내 정보 보기 -->
+	<select id="view" resultType="com.ikeo.member.vo.MemberVO">
+		select m.name, m.nickname, m.birth, m.tel, m.email, m.reg_date, m.con_date, m.grade_no, g.grade_name
+		from member m, grade g
+		where m.id = #{id} and (m.grade_no = g.grade_no)
+	</select>
+	
+	<!-- 내 정보 수정 -->
+	
+	<!-- 내 비밀번호 변경 -->
+	<update id="changePw">
+		update member set pw = #{pw}
+		where id = #{id}
+	</update>
+	
+	<!-- 회원 탈퇴 -->
+	<update id="withdrawals">
+		update member set status = '탈퇴'
+		where id = #{id}
+	</update>
+	
+	<!-- 등급 테이블 리스트 -->
+	<select id="gradeList" resultType="com.ikeo.member.vo.GradeVO">
+		select grade_no, grade_name
+		from grade
+		order by grade_no asc
+	</select>
+</mapper>

@@ -1,0 +1,92 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>아이디 찾기</title>
+<link rel="stylesheet" href="/resources/css/member.css">
+<script type="text/javascript">
+	$(function() {
+		$("#findPwBtn")
+				.click(
+						function() {
+							$
+									.ajax({
+										url : '/memberAjax/findPw.action',
+										type : 'POST',
+										data : {
+											id : $('#id').val(),
+											tel : $('#tel').val()
+										},
+										success : function(data) {
+											let result = data;
+											let resultHtml = "";
+											if (result == 1) {
+												// 비밀번호 재설정
+												resultHtml += "새로 설정할 비밀번호를 입력해주세요";
+												resultHtml += "<div><form action=\"changePw.do\" method=\"post\">";
+												resultHtml += "<div class=\"form-group\">";
+												resultHtml += "<input type=\"hidden\" class=\"form-control\" name=\"id\" value=\""
+														+ $('#id').val()
+														+ "\">";
+												resultHtml += "<input type=\"password\" class=\"form-control\" name=\"pw\">";
+												resultHtml += "</div>"
+												resultHtml += "<button>수정</button></form></div>";
+												$('#changePwContent').html(
+														resultHtml);
+											} else {
+												// 계정 정보 없음
+												$('#changePwContent')
+														.html(
+																'해당 정보와 일치하는 계정이 없습니다<br>계정 정보를 다시 확인해 주세요');
+											}
+										},
+										error : function() {
+											console.log('비밀번호 찾기 중 오류 발생');
+										}
+									})
+						})
+	});
+</script>
+</head>
+<body>
+	<div class="col-md-4"></div>
+	<div class="col-md-4">
+		<div id="box-small">
+			<h2>비밀번호 찾기</h2>
+			<div class="form-group items">
+				<label for="id">아이디:</label> <input type="text" name="id" id="id"
+					class="form-control" required placeholder="이름을 입력해주세요">
+			</div>
+			<div class="form-group items">
+				<label for="tel">전화번호:</label> <input type="text" name="tel"
+					id="tel" class="form-control" required placeholder="전화번호를 입력해주세요">
+			</div>
+			<div class="items-button">
+				<button type="button" id="findPwBtn" class="btn btn-primary"
+					data-toggle="modal" data-target="#changePwModal">찾기</button>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-4"></div>
+
+	<!-- Modal -->
+	<div class="modal fade" id="changePwModal" role="dialog">
+		<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">비밀번호 찾기</h4>
+				</div>
+				<div class="modal-body">
+					<div id="changePwContent"></div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

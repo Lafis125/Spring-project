@@ -1,0 +1,53 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>판매자 신청</title>
+</head>
+<body>
+	<div id="box-large">
+		<form action="apply.do" method="post">
+			<div class="form-group">
+				<input type="text" name="company_no" required maxlength="12"
+					class="form-control" placeholder="사업자 번호를 입력해주세요">
+			</div>
+			<div class="form-group">
+				<input type="text" name="company_name" required class="form-control"
+					placeholder="사업장 이름을 입력해주세요">
+			</div>
+			<div class="form-group">
+				<input type="tel" name="company_tel" required maxlength="13"
+					class="form-control" placeholder="사업장 전화번호를 입력해주세요">
+			</div>
+			<div class="form-inline">
+				<div class="form-group">
+					<input type="text" name="company_addr" required
+						class="form-control" placeholder="사업장 주소를 입력해주세요">
+				</div>
+				<div class="form-group">
+					<input type="text" name="company_detail_addr" required
+						class="form-control" placeholder="상세주소를 입력해주세요">
+				</div>
+			</div>
+			<div class="form-inline">
+				<div class="form-group">
+					<select name="company_bank" class="form-control">
+						<option value="국민은행">국민은행</option>
+						<option value="신한은행">신한은행</option>
+						<option value="기업은행">기업은행</option>
+						<option value="농협">농협</option>
+						<option value="카카오뱅크">카카오뱅크</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<input type="text" name="company_account" required class="form-control"
+						placeholder="정산받을 계좌번호를 입력해주세요">
+				</div>
+			</div>
+			<button type="submit" class="btn btn-primary btn-lg">신청하기</button>
+		</form>
+	</div>
+</body>
+</html>

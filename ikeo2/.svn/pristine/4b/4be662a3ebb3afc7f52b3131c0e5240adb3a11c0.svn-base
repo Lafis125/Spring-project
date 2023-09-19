@@ -1,0 +1,92 @@
+package com.ikeo.community.service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+
+import com.ikeo.community.mapper.CommunityMapper;
+import com.ikeo.community.vo.CommunityImageVO;
+import com.ikeo.community.vo.CommunityTagItemVO;
+import com.ikeo.community.vo.CommunityVO;
+import com.webjjang.util.page.PageObject;
+
+import lombok.Data;
+
+@Service
+@Qualifier("communityServiceImpl")
+@Data
+public class CommunityServiceImpl implements CommunityService {
+	
+	@Inject
+	private CommunityMapper mapper;
+	
+	@Override
+	public List<CommunityVO> list(PageObject pageObject) {
+		pageObject.setTotalRow(mapper.getTotalRow(pageObject));
+		return mapper.list(pageObject);
+	}
+
+	@Override
+	public CommunityVO view(Long no, Long inc) {
+		// TODO Auto-generated method stub
+		if(inc == 1) mapper.increase(no);
+		return mapper.view(no);
+	}
+	
+	@Override
+	public List<CommunityImageVO> getImageFile(Long no) throws Exception {
+		// TODO Auto-generated method stub
+		return mapper.getImageFile(no);
+	}
+
+	@Override
+	public Integer write(CommunityVO vo, List<CommunityImageVO> fileList) {
+		mapper.write(vo);
+		for(CommunityImageVO fileVO : fileList) {
+			fileVO.setNo(vo.getNo());
+			mapper.writeFile(fileVO);
+		}
+		return 1;
+	}
+	
+	public Integer update(CommunityVO vo)throws Exception{
+		System.out.println("ImageServiceImpl.update()");
+		return mapper.update(vo);
+	}
+	
+	@Override
+	public Integer delete(CommunityVO vo) throws Exception {
+		return mapper.delete(vo);
+	}
+
+	@Override
+	public Integer changeImage(CommunityImageVO vo) {
+		// TODO Auto-generated method stub
+		return mapper.changeImage(vo);
+	}
+
+	@Override
+	public Integer deleteImage(Long image_no, String id) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("image_no", image_no);
+		map.put("id", id);
+		return mapper.deleteImage(map);
+	}
+
+	@Override
+	public Integer detailImageWrite(CommunityImageVO vo) {
+		// TODO Auto-generated method stub
+		return mapper.detailImageWrite(vo);
+	}
+
+	@Override
+	public List<CommunityTagItemVO> searchItem(String word) {
+		// TODO Auto-generated method stub
+		return mapper.searchItem(word);
+	}
+}

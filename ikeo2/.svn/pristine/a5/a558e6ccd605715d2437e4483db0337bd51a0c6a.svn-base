@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ikeo.community.mapper.CommunityMapper">
+	<select id="list" resultType="com.ikeo.community.vo.CommunityVO">
+		select no, title, id, write_date, file_name, hit
+		from(
+			select rownum rnum, no, title, id, write_date, file_name, hit
+			from(
+				select no, title, id, write_date, hit,
+				(select file_name 
+				from community_image ci
+				where c.no = ci.no and pr = 1)file_name
+				from community c
+				<include refid="search"/>
+				order by no desc
+			)
+		)
+		where rnum between #{startRow} and #{endRow}
+	</select>
+	
+	<select id="getTotalRow" resultType="Long">
+		select count(*) 
+		from community
+		<include refid="search"/>
+	</select>
+	
+	<sql id="search">
+		<!-- 검색이 필요한 경우 -->
+		<if test="word != null and word != ''">
+			where 1 = 0 
+				<if test="key.indexOf('t') >= 0">
+					or title like '%' || #{word} || '%'
+				</if>
+				<if test="key.indexOf('c') >= 0">
+					or content like '%' || #{word} || '%'
+				</if>
+		</if>
+	</sql>
+	
+	<select id="view" resultType="com.ikeo.community.vo.CommunityVO">
+		select no, title, content, id, write_date,hit
+		from community
+		where no = #{no}
+	</select>
+	
+	<update id="increase">
+		update community 
+		set hit = hit + 1
+		where no = #{no}
+	</update>
+	
+	<select id="getImageFile" resultType="com.ikeo.community.vo.CommunityImageVO">
+		select image_no, file_name, pr
+		from community_image
+		where no = #{no}
+		order by pr desc, image_no
+	</select>
+		
+	<insert id="write">
+		<selectKey keyProperty="no" resultType="Long" order="BEFORE">
+			select community_seq.nextval
+			from dual
+		</selectKey>
+		
+		insert into community(no, title, content, id)
+		values(#{no}, #{title}, #{content}, #{id})
+	</insert>
+		
+	<!-- 이미지 파일 정보 저장 ImageVO.no -> ImageFileVO.no -->
+	<insert id="writeFile">
+		insert into community_image(image_no, no, file_name, pr)
+		values(community_image_seq.nextval, #{no}, #{file_name}, #{pr})
+	</insert>
+	
+	<update id="update">
+		update community set title = #{title}, content = #{content}
+		where no = #{no} and id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from community 
+		where no = #{no} and id = #{id}
+	</delete>
+	
+	<update id="changeImage">
+		update community_image
+		set file_name = #{file_name}
+		where image_no = #{image_no}
+	</update>
+	
+	<delete id="deleteImage">
+		delete from community_image if
+		where image_no = #{image_no} and (select i.id from community i where if.no = i.no) = #{id} and pr != 1
+	</delete>
+	
+	<insert id="detailImageWrite">
+		<if test="pr == 0">
+			insert into community_image(image_no, no, file_name, pr)
+			values(community_image_seq.nextval, #{no}, #{file_name}, #{pr})
+		</if>
+	</insert>
+</mapper>

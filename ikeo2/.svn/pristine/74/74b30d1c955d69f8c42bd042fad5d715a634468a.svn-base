@@ -1,0 +1,292 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ page import="java.net.URLEncoder"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="replayPageNav" tagdir="/WEB-INF/tags"%>
+<style type="text/css">
+.replyAnswer {
+	margin-left: 20px;
+	background: #f7f9fa;
+}
+
+.nickname {
+	font-size: 16px; /* 닉네임 글꼴 크기 */
+	margin-top: 5px;
+	font-weight: 700;
+}
+
+.pr_nickname {
+	font-size: 16px; /* 닉네임 글꼴 크기 */
+	margin-top: 5px;
+	color: skyblue;
+	font-weight: 700;
+}
+
+.media-body p.content {
+	font-size: 16px; /* 내용 글꼴 크기 */
+}
+
+.myReply{
+	font-size: 10px;
+    padding: 0px 4px;
+    color: #ffffff;
+    background-color: #35c5f0;
+    display: inline-block;
+    font-weight: 700;
+    height: 16px;
+    line-height: 16px;
+    border-radius: 4px;
+    margin-left: 5px;
+}
+</style>
+<script type="text/javascript">
+$(function(){	
+	// 댓글 달기 이벤트 처리
+	$("#replyBtn").click(function(){
+		let no = $("#no").val();
+		let content = $("#content").val();
+		$.ajax({
+			url: "/communityAjax/write.do",
+			data: {no:no, content:content},
+			success: function(result){
+				location.reload();
+				alert("등록완료 슛");
+			},
+			error: function(){
+				alert("댓글등록실패");
+			}
+		});
+	});
+
+		// 댓글 수정 이벤트 처리
+	   $(".replyUpdateBtn").click(function () {
+           let panel = $(this).closest('.dataRow');
+           let rno = panel.find('.rno').text();
+           let contentDiv = panel.find('.content');
+           let contentText = contentDiv.text().trim();
+           
+           let editInput = $('<input>', {
+               'type': 'text',
+               'class': 'form-control',
+               'value': contentText
+           });
+           
+           contentDiv.empty(); // 기존 내용 삭제
+           contentDiv.append(editInput);
+           
+       
+           let updateButton = $('<button>', {
+               'type': 'button',
+               'class': 'btn btn-info btn-xs updateBtn',
+               'text': '수정 완료'
+           });
+
+           let cancelButton = $('<button>', {
+               'type': 'button',
+               'class': 'btn btn-warning btn-xs cancelBtn',
+               'text': '취소'
+           });
+           
+           updateButton.click(function () {
+               let updateContent = editInput.val();
+               alert("rno :" + rno + " updateContent : " + updateContent);
+               $.ajax({
+                   url: "/communityAjax/update.do",
+                   data: {rno: rno, content: updateContent},
+                   type: "GET",
+                   success: function (data) {
+                       alert("수정완료 슛 - data: " + data);
+                       contentDiv.empty();
+                       contentDiv.text(updateContent); // 수정 내용을 다시 표시
+                       panel.find('.panel-footer').show(); // 수정 버튼 및 삭제 버튼 다시 표시
+                       location.reload();
+                   },
+                   error: function () {
+                       alert("댓글수정 실패");
+                   }
+               });
+           });
+           
+           cancelButton.click(function () {
+               // 취소 버튼을 클릭했을 때의 동작
+               contentDiv.empty();
+               contentDiv.text(contentText); // 수정 내용을 다시 표시
+               panel.find('.panel-footer').show(); // 수정 버튼 및 삭제 버튼 다시 표시
+           });
+                  
+           
+           contentDiv.append(updateButton);
+           contentDiv.append(cancelButton);
+           
+           // 수정할 때 수정 버튼과 삭제 버튼 숨기기
+           panel.find('.panel-footer').hide();
+       });
+
+       // 댓글 삭제 이벤트
+       $(".replyDeleteBtn").click(function(){
+           if(confirm("댓글을 삭제하시겠습니까?\n삭제한 댓글은 되돌릴 수 없습니다.")){
+               let rno =  $(this).closest('.dataRow').find('.rno').text();
+               alert("content: " + content + "rno: " + rno);
+               $.ajax({
+                   url:"/communityAjax/delete.do",
+                   data: {rno:rno},
+                   success: function(data){
+                     alert("댓글 삭제 성공 : data " + data);
+                     location.reload();
+                   },
+                   error: function(){
+                       alert("댓글 삭제 실패");
+                   }
+               });
+           }else{
+               return;
+           }
+    });
+
+    // 대댓글 달기 이벤트 처리
+       $(".replyAnswerBtn").click(function () {
+           let dataRow = $(this).closest('.dataRow');
+           // 입력 폼 생성
+           let replyForm = $('<div>', {
+               'class': 'replyForm',
+               'html': `
+                       <input type="hidden" name="no" value="${vo.no}" id="no">
+                       <input type="hidden" name="par_nickname" value="${parentNickname}">
+                       <input type="hidden" name="rno" value="${rno}">
+                       <input type="hidden" name="ord_no" value="${ord_no}"> <!-- 부모 댓글의 ord_no 설정 -->
+                       <input type="hidden" name="ref_no" value="${ref_no}"> <!-- 부모 댓글의 ord_no 설정 -->
+                       <div class="form-group">
+                           <textarea rows="3" name="content" class="form-control" id="answerContent" required></textarea>
+                       </div>
+                       <button class="btn btn-default" type="button" id="answerBtn">답글 등록</button>
+                       <button class="btn btn-default" type="button" id="cancelBtn">취소</button>
+               `
+           });
+
+           replyForm.find("#cancelBtn").click(function () {
+               // 입력한 내용을 지우고 입력 폼을 닫는다.
+               replyForm.remove();
+               dataRow.find('.panel-footer').show(); // 수정 버튼 및 삭제 버튼 다시 표시
+           });
+
+           // 기존의 입력 폼 및 답글 버튼 숨기기
+           dataRow.find('.replyForm').remove();
+           dataRow.find('.panel-footer').hide();
+
+           // 입력 폼 추가
+           dataRow.append(replyForm);
+
+           // 대댓글 버튼 클릭 이벤트 내부에서 alert 사용
+           replyForm.find("#answerBtn").click(function () {
+               let dataRow = $(this).closest('.dataRow');
+               let parentNickname = dataRow.find('.parent-nickname').text().trim().split('\n')[0]; // 부모 댓글의 nickname 가져오기
+               let rno = dataRow.find('.rno').text();
+               let content = dataRow.find("#answerContent").val();
+               let no = dataRow.find('#no').val();
+               let ord_no = dataRow.find('input[name="ord_no"]').val(); // 부모 댓글의 ord_no 가져오기
+               let ref_no = dataRow.find('input[name="ref_no"]').val(); // 부모 댓글의 ref_no 가져오기
+               alert("부모닉네임: " + parentNickname);	
+               alert("rno : " + rno);
+               alert("content: " + content);
+               alert("no : " + no);
+               alert("ord_no : " + ord_no);
+               alert("ref_no : " + ref_no);
+               $.ajax({
+                   url: "/communityAjax/answerWrite.do",
+                   data: { no: no, content: content, par_nickname: parentNickname, rno:rno, ord_no: ord_no, ref_no:ref_no }, // ord_no를 추가
+                   success: function (result) {
+                       location.reload();
+                       alert("답글 등록 완료");
+                   },
+                   error: function () {
+                       alert("답글 등록 실패");
+                   }
+               });
+           });
+       });
+});
+</script>
+<div id="replyDiv">
+	<h3>댓글</h3>
+	<c:if test="${!empty login}">
+		<div class="well" style="background: #d8d8d8">
+			<form action="/eventAjax/write.do" method="post">
+				<input type="hidden" name="no" value="${vo.no}" id="no">
+				<div class="form-group">
+					<textarea rows="3" name="content" class="form-control" id="content"
+						required placeholder="댓글을 남겨 보세요."></textarea>
+				</div>
+				<button class="btn btn-default" type="button" id="replyBtn">댓글
+					등록</button>
+			</form>
+		</div>
+	</c:if>
+	<c:if test="${empty replyList}">
+		<div class="well">댓글이 없습니다.</div>
+	</c:if>
+
+	<c:if test="${!empty replyList}">
+		<c:forEach items="${replyList}" var="replyVO">
+			<c:choose>
+				<c:when test="${!empty replyVO.par_no }">
+					<div class="media dataRow" style="margin-left: 20px; background-color:#f7f9fa ">
+				</c:when>
+				
+				<c:otherwise>
+					<div class="media dataRow">
+				</c:otherwise>
+			</c:choose>
+			<!-- 댓글 출력 코드 -->
+				<input type="hidden" name="ord_no" value="${replyVO.ord_no}">
+				<input type="hidden" name="ref_no" value="${replyVO.ref_no}">
+				<div class="media-body">
+					<h5 class="mt-0 mb-1 parent-nickname">
+					<c:choose>
+					    <c:when test="${!empty replyVO.par_nickname}">
+					        <div class="nickname">
+					            <c:if test="${replyVO.nickname == login.nickname}">
+					                ${replyVO.nickname}<span class="myReply">내 댓글</span>
+					            </c:if>
+					            <c:if test="${replyVO.nickname != login.nickname}">
+					                ${replyVO.nickname}
+					            </c:if>
+					        </div>
+					        <div class="pr_nickname">@${replyVO.par_nickname}</div>
+					    </c:when>
+					    <c:otherwise>
+					        <div class="nickname">
+					            <c:if test="${replyVO.nickname == login.nickname}">
+					                ${replyVO.nickname}<span class="myReply">내 댓글</span>
+					            </c:if>
+					            <c:if test="${replyVO.nickname != login.nickname}">
+					                ${replyVO.nickname}
+					            </c:if>
+					        </div>
+					    </c:otherwise>
+					</c:choose>
+					</h5>
+					<p class="content" id="content">${replyVO.content}</p>
+					<small class="text-muted float-right"> <fmt:formatDate
+							value="${replyVO.write_date}" pattern="yy.MM.dd. HH:mm" />
+					</small> <span class="rno" style="display: none;">${replyVO.rno}</span>
+					<c:if test="${!empty login && login.id != replyVO.reply_id}">
+							<button type="button" class="btn btn-info btn-xs replyAnswerBtn">답글 쓰기</button>
+					</c:if>
+					<div class="text-right">
+						<c:if test="${!empty login && login.id == replyVO.reply_id}">
+							<button type="button"
+								class="btn btn-primary btn-xs replyUpdateBtn">수정</button>
+							<button type="button"
+								class="btn btn-danger btn-xs replyDeleteBtn">삭제</button>
+						</c:if>
+					</div>
+				</div>
+			</div>
+		</c:forEach>
+	</c:if>
+	<div>
+		<replayPageNav:replayPageNav listURI="view.do"
+			pageObject="${replyPageObject}" query="${query}"></replayPageNav:replayPageNav>
+	</div>
+</div>

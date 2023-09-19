@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.ikeo.member.seller.mapper.SellerMapper">
+	
+	<!-- 판매자 신청 -->
+	<insert id="apply">
+		insert into seller(company_no, id, company_name, company_tel, company_addr, company_detail_addr, company_bank, company_account)
+		values(#{company_no}, #{id}, #{company_name}, #{company_tel}, #{company_addr}, #{company_detail_addr}, #{company_bank}, #{company_account})
+	</insert>
+	
+	<!-- 판매자 신청 시 등급을 6으로 변경(판매자 승인 대기) -->
+	<update id="changeSeller">
+		update member set grade_no = 6
+		where id = #{id}
+	</update>
+	
+	<!-- 판매자 마이페이지 -->
+	<select id="view" resultType="com.ikeo.member.seller.vo.SellerVO">
+		select company_no, id, company_name, company_tel, company_addr, company_detail_addr, company_bank, company_account
+		from seller
+		where id = #{id}
+	</select>
+	
+	<!-- 판매자 리스트 -->
+	<select id="list" resultType="com.ikeo.member.seller.vo.SellerVO">
+		select s.company_no, s.id, s.company_name, s.company_tel, s.company_addr, s.company_detail_addr, s.company_bank, s.company_account,
+		m.grade_no, g.grade_name
+		from seller s, member m, grade g
+		where (s.id = m.id) and (m.grade_no = g.grade_no)
+		<if test="grade_no == 0">
+			<!-- 전체 검색 -->
+		</if>
+		<if test="grade_no == 6">
+			<!-- 판매자 승인 대기 중 -->
+			and m.grade_no = #{grade_no}
+		</if>
+		<if test="grade_no == 7">
+			<!-- 판매자 -->
+			and m.grade_no = #{grade_no}
+		</if>
+	</select>
+	
+</mapper>

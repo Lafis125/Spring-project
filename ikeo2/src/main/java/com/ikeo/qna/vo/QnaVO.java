@@ -1,0 +1,19 @@
+package com.ikeo.qna.vo;
+
+import java.util.Date;
+
+import lombok.Data;
+
+@Data
+public class QnaVO {
+
+	private Long no;
+	private String item_No;
+	private String title;
+	private String content;
+	private String id;
+	private Date writeDate;
+
+	
+	
+}

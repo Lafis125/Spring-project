@@ -1,0 +1,25 @@
+package com.ikeo.review.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.ikeo.review.vo.ReviewVO;
+import com.webjjang.util.page.PageObject;
+
+@Service
+public interface ReviewService {
+
+	public List<ReviewVO> list(PageObject pageObject);
+	
+	public ReviewVO view(Long no);
+
+	public Integer write(ReviewVO vo);
+	
+	public Integer update(ReviewVO vo);
+
+	public Integer delete(ReviewVO vo);
+	
+	
+	
+}

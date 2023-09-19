@@ -1,0 +1,230 @@
+<%@page import="com.ikeo.member.vo.GradeVO"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<link rel="stylesheet" href="/resources/css/member.css?v=4">
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>회원 리스트</title>
+<style type="text/css">
+#listDiv{
+  	height: 400px;
+  	width: 1200px;
+ 	overflow-y: scroll;
+ 	overflow-x: hidden;
+}
+</style>
+<script type="text/javascript">
+	var page = 1;
+	var key = ${search.key};
+	var word = ${search.word};
+	var gradeList = ${gradeList};
+	
+	$(function() {
+ 		list(page, key, word);
+
+		// 검색어 키워드 변경
+ 		$("#key").change(function(){
+ 	 		key = $("#key").val();
+ 	 	});
+
+		// 페이징 처리
+ 		$("#listDiv").scroll(function(){
+			let height = $("#listDiv").scrollTop();
+			let innerHeight = $("#listDiv").innerHeight();
+			let scrollHeight = $('#listDiv').prop('scrollHeight');
+			if(height + innerHeight >= scrollHeight) {
+				page++;
+				list(page, key, word);
+			}
+		});
+
+		// 검색창 X 버튼
+		$("#resetBtn").click(function(){
+			$("#word").val('');
+			changeWord();
+		});
+
+	});
+
+	// 등급 변경
+	function changeGrade(obj) {
+		let tr = $(obj).closest("tr");
+		// 등급 번호
+		let grade_no = tr.find(".gradeNo").val();
+		// 등급 이름(알림창 출력을 위해서)
+		let grade_name = tr.find(".gradeNo option:checked").text();
+		// 아이디
+		let id = tr.find(".id").text();
+		if(confirm("정말로 [" + id + "]님의 등급을 [" + grade_name + "]으로 변경하시겠습니까?")) {
+			$.ajax({
+				url : "/memberAjax/changeGrade.action",
+				type : "POST",
+				data : {
+					id : id,
+					grade_no : grade_no
+				},
+				success : function(data) {
+					let result = data;
+					// 등급 수정 성공
+					if(result == 1) {
+						console.log("등급 수정 성공");
+						alert("등급이 수정되었습니다");
+					}
+					// 등급 수정 실패
+					else {
+						console.log("등급 수정 실패");
+						alert("등급 수정에 실패했습니다");
+					}
+				},
+				error : function() {
+					console.log("등급 수정 오류");
+				}
+			})
+		}
+	}
+
+	// 상태 변경
+	function changeStatus(obj) {
+		let tr = $(obj).closest("tr");
+		// 상태
+		let status = tr.find(".status").val();
+		// 아이디
+		let id = tr.find(".id").text();
+		if(confirm("정말로 [" + id + "]님의 상태를 [" + status + "]으로 변경하시겠습니까?")) {
+			$.ajax({
+				url : "/memberAjax/changeStatus.action",
+				type : "POST",
+				data : {
+					id : id,
+					status : status
+				},
+				success : function(data) {
+					let result = data;
+					// 상태 수정 성공
+					if(result == 1) {
+						console.log("상태 수정 성공");
+						alert("상태가 수정되었습니다");
+					}
+					// 상태 수정 실패
+					else {
+						console.log("등급 수정 실패");
+						alert("상태 수정에 실패했습니다");
+					}
+				},
+				error : function() {
+					console.log("상태 수정 오류");
+				}
+			})
+		}
+	}
+	
+	function changeWord() {
+		word = $("#word").val();
+		page = 1;
+		list(page, key, word);
+	}
+	
+	function list(page, key, word){
+		let query = '?';
+		query += 'page=' + page + '&key=' + key + '&word=' + word;
+		$.ajax({
+			url : "/memberAjax/list.action" + query,
+			type : 'GET',
+			dataType : 'json',
+			success : function(data) {
+				// 받아온 json 처리
+				var resultHtml = "";
+				resultHtml += "<table class=\"table table-bordered\"><tr>";
+				resultHtml += "<th>아이디</th>";
+				resultHtml += "<th>이름</th>";
+				resultHtml += "<th>닉네임</th>";
+				resultHtml += "<th>이메일</th>";
+				resultHtml += "<th>전화번호</th>";
+				resultHtml += "<th>등급</th>";
+				resultHtml += "<th>회원가입일</th>";
+				resultHtml += "<th>최근접속일</th>";
+				resultHtml += "<th>상태</th>";
+				resultHtml += "</tr>";
+				for (var i = 0; i < data.length; i++) {
+					resultHtml += "<tr>";
+					resultHtml += "<td class=\"id\">" + data[i].id + "</td>";
+					resultHtml += "<td>" + data[i].name + "</td>";
+					resultHtml += "<td>" + data[i].nickname + "</td>";
+					resultHtml += "<td>" + data[i].email + "</td>";
+					resultHtml += "<td>" + data[i].tel + "</td>";
+					resultHtml += "<td><select class=\"form-control gradeNo\" onchange=\"changeGrade(this);\">";
+					for (var j = 0; j < gradeList.length; j++) {
+						resultHtml += "<option value=" + gradeList[j].grade_no + " " + ((data[i].grade_no == gradeList[j].grade_no)?"selected":"") + ">" + gradeList[j].grade_name + "</option>";						
+					}
+					resultHtml += "</td>";
+					 // 날짜 포맷 함수를 사용하여 등록일을 포맷
+			        var regDate = formatDate(data[i].reg_date);
+			        resultHtml += "<td>" + regDate + "</td>";
+			        // 날짜 포맷 함수를 사용하여 최근 접속일을 포맷
+			        var conDate = formatDate(data[i].con_date);
+			        resultHtml += "<td>" + conDate + "</td>";
+			        resultHtml += "<td><select class=\"form-control status\" onchange=\"changeStatus(this)\">";
+			        resultHtml += "<option value=\"정상\" " + ((data[i].status == "정상")?"selected":"") + ">정상</option>"
+			        resultHtml += "<option value=\"정지\" " + ((data[i].status == "정지")?"selected":"") + ">정지</option>"
+			        resultHtml += "<option value=\"탈퇴\" " + ((data[i].status == "탈퇴")?"selected":"") + ">탈퇴</option>"
+			        resultHtml += "</select></td>";
+					resultHtml += "</tr>";
+				}
+				resultHtml += "</table>"
+				$("#listDiv").html(resultHtml);
+			},
+			error : function() {
+				alert("리스트 불러오는 중 오류");
+			}
+		});
+	}
+
+	// JavaScript로 날짜 포맷 함수를 정의
+	function formatDate(dateString) {
+	    var date = new Date(dateString);
+	    var year = date.getFullYear();
+	    var month = (date.getMonth() + 1).toString().padStart(2, '0');
+	    var day = date.getDate().toString().padStart(2, '0');
+	    return year + "-" + month + "-" + day;
+	}
+</script>
+<style type="text/css">
+body{
+	background-color: #f0f0f0;
+}
+</style>
+</head>
+<body>
+	<h2>회원 리스트</h2>
+	<div class="container">
+		<div class="form-inline">
+			<div style="float: left;">
+				<div class="form-group">
+					<select class="form-control" id="key" name="key">
+						<option value="id">아이디</option>
+						<option value="name">이름</option>
+						<option value="nick">닉네임</option>
+						<option value="idnamenick">전체</option>
+					</select>
+				</div>
+			</div>
+			<div style="float: left;">
+				<div class="input-group">
+					<input type="text" class="form-control" placeholder="Search"
+						name="word" id="word" value="${search.word }" onkeyup="changeWord();">
+				</div>
+			</div>
+			<div style="float: left;">
+				<button type="button" id="resetBtn" class="btn btn-default">X</button>
+			</div>
+		</div>
+		<div class="row">
+			<pre class="pre-scrollable" id="listDiv"></pre>
+		</div>
+	</div>
+</body>
+</html>

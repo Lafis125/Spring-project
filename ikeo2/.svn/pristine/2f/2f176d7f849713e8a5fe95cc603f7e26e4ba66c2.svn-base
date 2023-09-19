@@ -1,0 +1,118 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>이벤트 등록</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet"
+	href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+	
+<script type="text/javascript">
+	$(function(){
+		//이벤트 처리
+		$("#appendImageBtn").click(function(){
+			let cnt = $(".imageFile").length;
+			//alert("추가 이미지 개수 - " + cnt);
+			if(cnt == 5){
+				alert("추가 이미지 파일은 5개 까지만 가능합니다.");
+				return;
+			}
+			
+			let html = "";
+			html += "<div class=\"form-group\">";
+			html += "<label>추가 이미지<button class='removeImageFileBtn' type='button'>X</button></label>"; 
+			html += "<input class=\"imageFile\" name=\"imageFile\" class=\"form-control\" type=\"file\">";
+			html += "</div>";
+
+			// appendDiv에 html 뒤에 추가 
+			// html(data) - html 데이터 바꾸기. text(data) - text 데이터 바꾸기. 
+			// append(data) - 뒤에 추가하기. preppend(data) - 앞에 추가하기
+			$("#appendDiv").append(html);
+		});
+
+		$("#appendDiv").on("click",".removeImageFileBtn",function(){
+			//alert("추가 파일 지우기");
+			// 클릭한 것의 form-group 지운다.
+			$(this).closest(".form-group").remove();
+		});
+
+		 $.datepicker.regional['ko'] = {
+			        closeText: '닫기',
+			        prevText: '이전달',
+			        nextText: '다음달',
+			        currentText: '오늘',
+			        monthNames: ['1월(JAN)','2월(FEB)','3월(MAR)','4월(APR)','5월(MAY)','6월(JUN)',
+			        '7월(JUL)','8월(AUG)','9월(SEP)','10월(OCT)','11월(NOV)','12월(DEC)'],
+			        monthNamesShort: ['1월','2월','3월','4월','5월','6월',
+			        '7월','8월','9월','10월','11월','12월'],
+			        dayNames: ['일','월','화','수','목','금','토'],
+			        dayNamesShort: ['일','월','화','수','목','금','토'],
+			        dayNamesMin: ['일','월','화','수','목','금','토'],
+			        weekHeader: 'Wk',
+			        dateFormat: 'yy-mm-dd',
+			        firstDay: 0,
+			        isRTL: false,
+			        showMonthAfterYear: true,
+			        yearSuffix: '',
+			        showOn: 'both',
+			        changeMonth: true,
+			        changeYear: true,
+			        yearRange: 'c-99:c+99',
+			    };
+			    $.datepicker.setDefaults($.datepicker.regional['ko']);
+
+			    $('#startDate').datepicker();
+			    $('#startDate').datepicker("option", "maxDate", $("#endDate").val());
+			    $('#startDate').datepicker("option", "onClose", function ( selectedDate ) {
+			        $("#endDate").datepicker( "option", "minDate", selectedDate );
+			    });
+
+			    $('#endDate').datepicker();
+			    $('#endDate').datepicker("option", "minDate", $("#startDate").val());
+			    $('#endDate').datepicker("option", "onClose", function ( selectedDate ) {
+			        $("#startDate").datepicker( "option", "maxDate", selectedDate );
+			        
+			    });
+	});
+</script>
+</head>
+<body>
+	<div class="container">
+		<h2>이벤트 게시판 등록</h2>
+		<form action="write.do" method="post" enctype="multipart/form-data">
+			<input type="hidden" name="perPageNum" value="${param.perPageNum }">
+			<div class="form-group">
+				<label for="title">제목</label> <input id="title" name="title"
+					required class="form-control">
+			</div>
+
+			<div class="form-group">
+				<label for="content">내용</label>
+				<textarea id="content" name="content" rows="5" class="form-control"></textarea>
+			</div>
+			
+			<div class="form-group">
+			<label>이벤트 시작일</label>
+			<input name="start_date" class="form-control" id="startDate">
+			</div>
+			
+			<div class="form-group">
+				<label>이벤트 종료일</label>
+				<input name="end_date" class="form-control" id="endDate">
+			</div>
+			
+			<div class="form-group">
+				<label for="preImageFile">대표 이미지</label> 
+				<input id="preImageFile" name="preImageFile" required class="form-control" type="file">
+			</div>
+			<button id="appendImageBtn" type="button" class="btn btn-success btn-block">추가 이미지</button>
+			<div id="appendDiv" style="margin-bottom: 10px;"></div>
+			<button class="btn btn-default">등록</button>
+		</form>
+	</div>
+</body>
+</html>

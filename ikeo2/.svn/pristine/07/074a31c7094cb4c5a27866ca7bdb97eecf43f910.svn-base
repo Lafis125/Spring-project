@@ -1,0 +1,168 @@
+package com.ikeo.product.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.ikeo.product.pageObject.ProductPageObject;
+import com.ikeo.product.service.ProductServiceImpl;
+import com.ikeo.product.vo.ProductVO;
+import com.webjjang.util.file.FileUtil;
+import com.webjjang.util.page.PageObject;
+
+import lombok.Data;
+import lombok.extern.java.Log;
+
+@Controller
+@RequestMapping("/product")
+@Data
+@Log
+public class ProductController {
+
+	@Autowired
+	@Qualifier("productServiceImpl")
+	private ProductServiceImpl service;
+
+	String path = "/upload/image";
+
+	@GetMapping("/list.do")
+	public String list(Model model, @ModelAttribute(name = "pageObject") ProductPageObject pageObject,
+			HttpServletRequest request) throws Exception {
+		log.info("ProductController List ..........................");
+		String perPageNumStr = request.getParameter("perPageNum");
+		System.out.println(perPageNumStr);
+		pageObject.setPerPageNum(
+				(perPageNumStr == null || perPageNumStr.equals("null") || perPageNumStr.equals(null)) ? 8L
+						: Long.parseLong(perPageNumStr));
+		model.addAttribute("category", service.categoryList());
+		model.addAttribute("list", service.list(pageObject));
+		model.addAttribute("vo", pageObject);
+		log.info("model - " + model);
+		return "product/list";
+	}
+
+	@GetMapping("/view.do")
+	public String view(Long no, Model model) throws Exception {
+		log.info("ProductController view ..........................");
+		System.out.println("ProductController.view().no = " + no);
+
+		ProductVO vo = service.view(no);
+		Long itemprice = Long.parseLong(vo.getItem_price().replaceAll(",", ""));
+		List<Long> pricelist = new ArrayList<>();
+		List<ProductVO> list = service.optionList(no);
+		for (ProductVO li : list) {
+			Long optionprice = Long.parseLong(li.getOption_price());
+			Long allprice = itemprice + optionprice;
+			pricelist.add(allprice);
+		}
+		model.addAttribute("vo", vo);
+		model.addAttribute("option", list);
+		model.addAttribute("sumprice", pricelist);
+		return "product/view";
+	}
+
+	@GetMapping("/write.do")
+	public String writeForm(Model model) throws Exception {
+		log.info("ProductController writeForm ..........................");
+		model.addAttribute("cateList", service.categoryList());
+		return "product/write";
+	}
+
+	@PostMapping("/write.do")
+	public String write(ProductVO vo, Long perPageNum, HttpServletRequest request, RedirectAttributes rttr)
+			throws Exception {
+		log.info("ProductController write ..........................");
+
+		System.out.println("ProductController.write().vo - " + vo);
+		String thum_Name = FileUtil.upload(path, vo.getThum_File(), request);
+		String img_Name = FileUtil.upload(path, vo.getImg_File(), request);
+		log.info("thum Name : " + thum_Name);
+		log.info("img Name : " + img_Name);
+
+		vo.setItem_thum(thum_Name);
+		vo.setItem_img(img_Name);
+		if (service.write(vo) != 1) {
+			rttr.addFlashAttribute("msg", "상품 등록에 실패했습니다..");
+		} else {
+			rttr.addFlashAttribute("msg", "상품 등록이 되었습니다.");
+		}
+		Thread.sleep(500);
+		return "redirect:list.do?category_no=1&perPageNum=" + perPageNum;
+	}
+
+	// 글수정 폼.
+	@GetMapping("/update.do")
+	public String updateForm(Long no, Model model) throws Exception {
+		log.info("ProductController updateForm ..........................");
+		System.out.println("ProductController.updateForm().no - " + no);
+		model.addAttribute("vo", service.view(no));
+		model.addAttribute("list", service.optionList(no));
+		return "product/update";
+	}
+
+	// 글수정 처리.
+	@PostMapping("/update.do")
+	public String update(ProductVO vo, @ModelAttribute(name = "pageObject") ProductPageObject pageObject,
+			HttpServletRequest request, RedirectAttributes rttr) throws Exception {
+		log.info("ProductController update ..........................");
+		System.out.println("ProductController.update().vo - " + vo);
+		log.info("ProductController update - thum File : " + vo.getThum_File());
+		log.info("ProductController update - Item_thum : " + vo.getItem_thum());
+
+		log.info("ProductController update - img File : " + vo.getImg_File());
+		log.info("ProductController update - Item_img : " + vo.getItem_img());
+		if (vo.getThum_File() != null) {
+			String thum_Name = FileUtil.upload(path, vo.getThum_File(), request);
+			vo.setItem_thum(thum_Name);
+		}
+		if (vo.getImg_File() != null) {
+			String img_Name = FileUtil.upload(path, vo.getImg_File(), request);
+			vo.setItem_img(img_Name);
+		}
+
+		Integer result = service.update(vo);
+
+		if (result == 1)
+			rttr.addFlashAttribute("msg", "상품 수정이 완료되었습니다..");
+		else
+			rttr.addFlashAttribute("msg", "상품 수정이 실패했습니다.");
+		Thread.sleep(500);
+		return "redirect:view.do?no=" + vo.getItem_no() + "&" + pageObject.getPageQuery();
+	}
+
+	// 글삭제 처리.
+	@GetMapping("/delete.do")
+	// no만 넘어온다. vo를 쓰는 이유 : no를 받으면 vo를 생성하고 no를 세팅하는 코드를 더 작성해야만 한다.
+	public String delete(ProductVO vo, Long perPageNum, HttpServletRequest request, RedirectAttributes rttr)
+			throws Exception {
+		log.info("ProductController delete ..........................");
+		System.out.println("ProductController.delete().vo - " + vo);
+
+		Integer result = service.delete(vo);
+
+		log.info("Controller delete() - result : " + result);
+		if (result == 1) {
+			FileUtil.remove(FileUtil.getRealPath("", vo.getItem_thum(), request));
+			FileUtil.remove(FileUtil.getRealPath("", vo.getItem_img(), request));
+			rttr.addFlashAttribute("msg", "상품 (글번호:" + vo.getItem_no() + ") 삭제가 되었습니다.");
+		} else {
+			// modal 창에서 줄 바꿈은 <br>로 한다. alert에서 줄 바꿈은 \n으로 한다.
+			rttr.addFlashAttribute("msg", "상품 (글번호:" + vo.getItem_no() + ") 삭제되지 않았습니다. <br> 다시 시도하시거나 문의 바랍니다.");
+		}
+		return "redirect:list.do?perPageNum=" + perPageNum;
+	}
+
+}

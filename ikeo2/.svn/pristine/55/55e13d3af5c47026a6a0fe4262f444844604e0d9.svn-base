@@ -1,0 +1,117 @@
+#box-small{
+	margin-top: 40px;
+	margin-bottom: 40px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-evenly;
+	border: 1px solid black;
+	border-radius: 10px;
+	box-shadow: 5px 5px 10px 5px;
+	min-height: 500px;
+	width: 400px;
+}
+#box-medium{
+	margin-top: 40px;
+	margin-bottom: 40px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	border: 1px solid black;
+	border-radius: 10px;
+	box-shadow: 5px 5px 10px 5px;
+	min-height: 500px;
+	width: 600px;
+}
+#box-large{
+	margin-top: 40px;
+	margin-bottom: 40px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	border: 1px solid black;
+	border-radius: 10px;
+	box-shadow: 5px 5px 10px 5px;
+	min-height: 1000px;
+	width: 800px;
+}
+.items{
+	width: 100%;
+	margin: 20px 5px;
+	padding-left: 10%;
+	padding-right: 10%;
+	align-items: center;
+	justify-content: space-evenly;
+}
+.items-lg{
+	width: 700px;
+	margin: 20px 5px;
+	padding-left: 10%;
+	padding-right: 10%;
+	align-items: center;
+	justify-content: space-evenly;
+}
+.items-lg-check{
+	width: 700px;
+	margin: 20px 5px;
+	align-items: center;
+	justify-content: space-evenly;
+}
+.inline{
+	float: left;	
+}
+.rows{
+	clear: left;
+}
+.items-button{
+	margin: 10px 5px;
+	text-align: center;
+}
+#checkId {
+	margin-left: 10%;
+	margin-right: 10%;
+	padding: 7px 10px;
+	height: 30px;
+	border-radius: 5px;
+	font-size: 12px;
+}
+#checkNickname {
+	margin-left: 10%;
+	margin-right: 10%;
+	padding: 4px 10px;
+	height: 40px;
+	border-radius: 5px;
+	font-size: 12px;
+}
+#checkPw {
+	margin-left: 10%;
+	margin-right: 10%;
+	padding: 7px 10px;
+	height: 30px;
+	border-radius: 5px;
+	font-size: 12px;
+}
+#checkName {
+	margin-left: 10%;
+	margin-right: 10%;
+	padding: 7px 10px;
+	height: 30px;
+	border-radius: 5px;
+	font-size: 12px;
+}
+#checkTel {
+	margin-left: 10%;
+	margin-right: 10%;
+	padding: 7px 10px;
+	height: 30px;
+	border-radius: 5px;
+	font-size: 12px;
+}
+#checkEmail {
+	margin-left: 10%;
+	margin-right: 10%;
+	padding: 7px 10px;
+	height: 40px;
+	border-radius: 5px;
+	font-size: 12px;
+}

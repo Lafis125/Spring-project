@@ -1,0 +1,31 @@
+package com.ikeo.event.vo;
+
+import java.util.Date;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
+
+import lombok.Data;
+
+@Data
+public class EventVO {
+	private Long no;
+	private String title;
+	private String content;
+	private String id;
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private Date start_date;
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private Date end_date;
+	private Date write_date;
+	private Date update_date;
+	// list할 때 기본 이미지 한개가 필요하다. : image_file table에 있다.
+	private String file_name;
+	
+	// byte 단위의 실제적인 파일 객체
+	// 대표 이미지 - 1개
+	private MultipartFile preImageFile;
+	
+	// 추가 이미지 - 여러개(0~5 사이의)
+	private MultipartFile[] imageFile;
+} 

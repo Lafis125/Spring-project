@@ -1,0 +1,81 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>이미지 등록</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.min.css">
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.min.js"></script>
+<script type="text/javascript">
+	$(function(){
+        let preImageCropper;
+
+        // 대표 이미지 파일 선택 시 Cropper.js 모달 열기
+        $('#preImageFile').change(function() {
+            const selectedFile = this.files[0];
+            if (selectedFile) {
+                // Cropper.js 모달 열기
+                const preImage = document.getElementById('preImage');
+                preImageCropper = new Cropper(preImage, {
+                    viewMode: 1, // 자르기 영역 뷰 모드 설정
+                    aspectRatio: 1, // 자르기 비율 (원하는 비율로 설정)
+                    responsive: true, // Cropper.js 모달의 크기를 조정
+                });
+            }
+        });
+
+        // 대표 이미지 자르기 버튼 클릭 시
+        $('#cropPreImage').click(function() {
+            if (preImageCropper) {
+                // 자른 이미지 데이터를 얻습니다.
+                const croppedData = preImageCropper.getCroppedCanvas().toDataURL('image/jpg');
+	
+                // 얻은 이미지 데이터를 서버로 업로드하거나 다른 작업을 수행합니다.
+                // 예: AJAX 요청을 사용하여 서버에 이미지 업로드
+            }
+        });
+	});
+</script>
+</head>
+<body>
+	<div class="container">
+		<h2>이벤트 등록</h2>
+		<form action="write.do" method="post" enctype="multipart/form-data">
+			<input type="hidden" name="perPageNum" value="${param.perPageNum }">
+			<div class="form-group">
+				<label for="title">제목</label> <input id="title" name="title"
+					required class="form-control">
+			</div>
+
+			<div class="form-group">
+				<label for="content">내용</label>
+				<textarea id="content" name="content" rows="5" class="form-control"></textarea>
+			</div>
+
+			<div class="form-group">
+				<label for="preImageFile">대표 이미지</label> 
+				<input id="preImageFile" name="preImageFile" required class="form-control" type="file">
+			</div>
+
+			<div>
+				<img id="preImage" src="" alt="대표 이미지">
+				<button id="cropPreImage" type="button" class="btn btn-primary btn-block">대표 이미지 자르기</button>
+			</div>
+
+			<button id="appendImageBtn" type="button" class="btn btn-success btn-block">추가 이미지</button>
+			<div id="appendDiv" style="margin-bottom: 10px;"></div>
+			<button class="btn btn-default">등록</button>
+		</form>
+	</div>
+</body>
+</html>

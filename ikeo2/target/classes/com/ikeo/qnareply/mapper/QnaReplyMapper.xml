@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ikeo.qnareply.mapper.QnaReplyMapper">
+	<select id="replylist" resultType="com.ikeo.qna.vo.QnaReplyVO">
+		select rno, no, content, id, writeDate from qna_reply
+		where no = #{no} order by rno desc
+	</select>
+
+	<insert id="write">
+		insert into qna_reply(rno,no,content,id)
+		values(qna_reply_seq.nextval,#{no}, #{content}, #{id})
+	</insert>
+
+	<update id="update">
+		update qna_reply
+		set
+		content = #{content},
+		writeDate = sysdate
+		where rno = #{rno}
+	</update>
+
+	<delete id="delete">
+		delete from qna_reply
+		where rno = #{rno}
+	</delete>
+
+</mapper>

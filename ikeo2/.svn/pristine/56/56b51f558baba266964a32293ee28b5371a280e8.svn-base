@@ -1,0 +1,29 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Qna Write</title>
+</head>
+<body>
+<div class="container">
+	<h2>Qna Write</h2>
+	<form action="write.do" method="post" enctype="multipart/form-data">
+		<div class="form-group">
+			<label for="item_No">문의상품번호</label>
+			<input id="item_No" name="item_No" required class="form-control" value="${param.item_no }" readonly >
+		</div>
+		<div class="form-group">
+			<label for="title">제목</label>
+			<input id="title" name="title" required class="form-control">
+		</div>
+		<div class="form-group">
+			<label for="content">내용</label>
+			<textarea rows="5" id="content" name="content" required class="form-control"></textarea>
+		</div>
+		<button class="btn btn-default">등록</button>
+	</form>
+</div>
+</body>
+</html>

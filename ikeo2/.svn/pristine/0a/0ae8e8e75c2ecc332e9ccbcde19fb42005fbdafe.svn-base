@@ -1,0 +1,27 @@
+package com.ikeo.member.ajax.mapper;
+
+import java.util.List;
+
+import com.ikeo.member.vo.MemberVO;
+import com.ikeo.member.vo.SearchVO;
+
+public interface MemberAjaxMapper {
+
+	public Integer checkId(String id);
+
+	public Integer checkNickname(String nickname);
+	
+	public List<MemberVO> list(SearchVO search);
+	
+	public String findId(MemberVO vo);
+	
+	public Integer findPw(MemberVO vo);
+	
+	public Integer changeGrade(MemberVO vo);
+	
+	public Integer changeStatus(MemberVO vo);
+	
+	public Integer acceptApply(MemberVO vo);
+	
+	public Integer cancelApply(MemberVO vo);
+}

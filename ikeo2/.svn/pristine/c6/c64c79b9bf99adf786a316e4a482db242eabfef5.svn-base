@@ -1,0 +1,180 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>장바구니</title>
+<style type="text/css">
+/* styles.css */
+body {
+	font-family: Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+	background-color: #f8f8f8;
+}
+
+.cart-container {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 20px;
+	background-color: #fff;
+	border: 1px solid #ddd;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+	font-size: 24px;
+	margin-bottom: 20px;
+	color: #333;
+}
+
+.cart-list {
+	list-style: none;
+	padding: 0;
+}
+
+.cart-item {
+	display: flex;
+	border-bottom: 1px solid #ddd;
+	padding: 10px 0;
+	margin-bottom: 10px;
+}
+
+.cart-item-image img {
+	max-width: 100px;
+	max-height: 100px;
+	margin-right: 20px;
+}
+
+.cart-item-details h2 {
+	font-size: 18px;
+	margin: 0;
+	color: #333;
+}
+
+.cart-item-details p {
+	margin: 5px 0;
+	color: #555;
+}
+
+.total-price {
+	font-weight: bold;
+	color: #333;
+}
+
+.delete-button {
+	color: #ff0000;
+	text-decoration: none;
+	margin-left: 10px;
+}
+
+.cart-summary {
+	margin-top: 20px;
+	text-align: right;
+}
+
+.total-amount {
+	font-size: 18px;
+	font-weight: bold;
+	color: #333;
+}
+
+.order-button {
+	display: inline-block;
+	padding: 10px 20px;
+	background-color: #007bff;
+	color: #fff;
+	text-decoration: none;
+	font-weight: bold;
+	border-radius: 5px;
+}
+
+/* Additional Styling for Cart Item */
+.container {
+	display: flex;
+	align-items: center;
+}
+
+.thumb img {
+	border: 1px solid #ddd;
+	padding: 5px;
+	border-radius: 5px;
+}
+
+.itemInfo {
+	margin-left: 30px;
+	flex: 1;
+}
+
+.deleteBtn {
+	color: #ff0000;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+.result {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.buttons {
+	margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+	<section id="content">
+		<h1>장바구니</h1>
+		<ul class="cart-list">
+			<c:set var="sum" value="0" />
+			<c:forEach items="${list}" var="vo">
+				<li class="cart-item">
+					<div class="container">
+						<div class="thumb">
+							<img src="${vo.item_thum}" alt="${vo.item_title} 이미지" />
+						</div>
+						<div class="itemInfo">
+							<h2>${vo.item_title}</h2>
+							<p>
+								<fmt:formatNumber var="optionpr" pattern="###,###,###"
+									value="${vo.option_price}" />
+								<span class="option">옵션 :
+									${vo.option_name}${vo.option_info}</span><br /> <span class="price">상품
+									가격 : ${vo.item_price}(+${optionpr}) 원</span><br /> <span
+									class="quantity">구입 수량 : ${vo.cnt}</span><br /> <span
+									class="total">총 가격 : <c:set var="cnt" value="${vo.cnt}" />
+									<c:set var="itemPriceStringWithoutComma"
+										value="${fn:replace(vo.item_price, ',', '')}" /> <c:set
+										var="itemPrice" value="${itemPriceStringWithoutComma}" /> <c:set
+										var="option_price" value="${vo.option_price}" /> <c:set
+										var="optplusitem" value="${itemPrice + option_price}" /> <fmt:formatNumber
+										var="itemAPrice" pattern="###,###,###"
+										value="${optplusitem*cnt}" /> ${itemAPrice }원
+								</span>
+							</p>
+							<a href="delete.do?cartNo=${vo.cartNo}" class="deleteBtn">삭제</a>
+						</div>
+					</div>
+				</li>
+				<c:set var="sum" value="${sum + (optplusitem*cnt)}" />
+			</c:forEach>
+		</ul>
+		<div class="result">
+			<div class="sum">
+				총 합계 : <span class="total-amount"> <fmt:formatNumber
+						pattern="###,###,###" value="${sum}" /> 원
+				</span>
+			</div>
+			<div class="buttons">
+				<a href="/order/write.do" class="order-button">주문하기</a>
+			</div>
+		</div>
+	</section>
+</body>
+</html>

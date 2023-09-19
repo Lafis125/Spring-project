@@ -1,0 +1,85 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>판매자 신청</title>
+<link rel="stylesheet" href="/resources/css/member.css?v=4">
+<style type="text/css">
+ul > li {
+	margin: 5px 0px;
+	padding: 2px;
+}
+</style>
+</head>
+<body>
+	<div class="col-md-2">
+		<div style="margin-top: 100px;">
+			<ul>
+				<li><a href="/member/mypage.do">마이페이지</a></li>
+				<li><a href="#">내가쓴글</a></li>
+				<li><a href="#">내가쓴리뷰</a></li>
+				<li><a href="/member/seller/apply.do">판매자신청</a></li>
+				<li><a href="/member/withdrawals.do">회원탈퇴</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class="col-md-8">
+		<div class="card-xl card-2">
+			<h2>판매자 신청</h2>
+			<form action="apply.do" method="post">
+				<div class="form-group items-lg">
+					<label>사업자 번호: </label>
+					<input type="text" name="company_no" required maxlength="12"
+						class="form-control input-lg" placeholder="사업자 번호를 입력해주세요">
+				</div>
+				<div class="form-group items-lg">
+					<label>사업장 이름: </label>
+					<input type="text" name="company_name" required class="form-control input-lg"
+						placeholder="사업장 이름을 입력해주세요">
+				</div>
+				<div class="form-group items-lg">
+					<label>사업장 전화번호: </label>
+					<input type="tel" name="company_tel" required maxlength="13"
+						class="form-control input-lg" placeholder="사업장 전화번호를 입력해주세요">
+				</div>
+				<div class="form-inline items-lg" style="margin: 0%; width: 100%;">
+					<label>사업장 주소: </label>
+					<div class="form-group">
+						<input type="text" name="company_addr" required
+							class="form-control input-lg" placeholder="사업장 주소를 입력해주세요">
+					</div>
+					<div class="form-group">
+						<input type="text" name="company_detail_addr" required
+							class="form-control input-lg" placeholder="상세주소를 입력해주세요">
+					</div>
+				</div>
+				<div class="form-inline items-lg">
+					<label>정산 계좌: </label>
+					<div class="form-group">
+						<select name="company_bank" class="form-control input-lg">
+							<option value="국민은행">국민은행</option>
+							<option value="신한은행">신한은행</option>
+							<option value="기업은행">기업은행</option>
+							<option value="농협">농협</option>
+							<option value="카카오뱅크">카카오뱅크</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<input type="text" name="company_account" required class="form-control input-lg"
+							placeholder="정산받을 계좌번호를 입력해주세요">
+					</div>
+				</div>
+				<center>
+					<div style="margin-bottom: 30px;">
+						<button type="submit" class="button__item login-button__item--black">신청하기</button>
+					</div>
+				</center>
+			</form>
+		</div>
+	</div>
+	<div class="col-md-2"></div>
+</body>
+</html>

@@ -1,0 +1,205 @@
+package com.ikeo.member.controller;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.ikeo.member.service.MemberService;
+import com.ikeo.member.vo.GradeVO;
+import com.ikeo.member.vo.LoginVO;
+import com.ikeo.member.vo.MemberVO;
+import com.ikeo.member.vo.SearchVO;
+
+import lombok.Data;
+import lombok.extern.java.Log;
+
+@Controller
+@RequestMapping("/member")
+@Data
+@Log
+public class MemberController {
+
+	@Autowired
+	@Qualifier("memberServiceImpl")
+	private MemberService service;
+
+	// 로그인 페이지
+	@GetMapping("/login.do")
+	public String loginForm() {
+		return "member/login";
+	}
+
+	// 로그인 처리
+	@PostMapping("/login.do")
+	public String login(LoginVO vo, HttpSession session, RedirectAttributes rttr) {
+		// 로그인 서비스
+		LoginVO login = service.login(vo);
+		// 로그인 성공
+		if (login != null) {
+			// 사용 가능한 아이디인지 확인
+			if (login.getStatus().equals("정지")) {
+				rttr.addFlashAttribute("msg", "서비스 이용이 정지되었습니다<br>이용 가능한 계정으로 로그인 해주세요");
+				return "redirect:/main.do";
+			}
+			// 사용 가능한 아이디인지 확인
+			if (login.getStatus().equals("탈퇴")) {
+				rttr.addFlashAttribute("msg", "계정이 탈퇴되었습니다<br>이용 가능한 계정으로 로그인 해주세요");
+				return "redirect:/main.do";
+			}
+			// 최근 접속일을 현재로 갱신
+			Integer result = service.updateConDate(vo);
+			// 최근 접속일 갱신 성공
+			if (result != 0) {
+				// 로그인 처리가 되었으므로 session.login에 login 정보를 담는다
+				System.out.println("최근 접속일 갱신 성공");
+				session.setAttribute("login", login);
+				return "redirect:/main.do";
+			}
+			// 최근 접속일 갱신 실패
+			else {
+				return "redirect:/member/login.do";
+			}
+		}
+		// 로그인 실패
+		else {
+			rttr.addFlashAttribute("msg", "로그인 정보가 맞지 않습니다<br>아이디와 비밀번호를 확인해주세요");
+			return "redirect:/member/login.do";
+		}
+	}
+
+	// 로그아웃 처리
+	@GetMapping("/logout.do")
+	public String logout(HttpSession session, RedirectAttributes rttr) {
+		session.removeAttribute("login");
+		System.out.println("로그아웃 성공" + session.getAttribute("login"));
+		return "redirect:/main.do";
+	}
+
+	// 회원가입 페이지
+	@GetMapping("/register.do")
+	public String registerForm() {
+		return "member/register";
+	}
+
+	// 회원가입 처리
+	@PostMapping("/register.do")
+	public String register(MemberVO vo, String domain, RedirectAttributes rttr) {
+		// 이메일 ID 부분과 domain 부분을 합쳐서 이메일로 저장
+		vo.setEmail(vo.getEmail() + "@" + domain);
+		Integer result = service.register(vo);
+		// 회원가입 성공
+		if (result == 1) {
+			rttr.addFlashAttribute("msg", "회원가입이 완료되었습니다");
+		}
+		// 회원가입 실패
+		else {
+			rttr.addFlashAttribute("msg", "회원가입에 실패했습니다");
+		}
+		return "redirect:/main.do";
+	}
+
+	// 마이페이지 페이지
+	@GetMapping("/mypage.do")
+	public String mypageForm(HttpSession session, Model model) {
+		String id = ((LoginVO) session.getAttribute("login")).getId();
+		model.addAttribute("vo", service.view(id));
+
+		return "member/mypage";
+	}
+
+	// 내 정보 수정 처리
+	@PostMapping("/update.do")
+	public String update(MemberVO vo) {
+		System.out.println("vo : " + vo);
+		Integer result = service.update(vo);
+		return "redirect:/member/mypage.do";
+	}
+
+	// 회원 리스트 페이지
+	@SuppressWarnings("unchecked")
+	@GetMapping("/list.do")
+	public String list(Model model) {
+		SearchVO vo = new SearchVO();
+		model.addAttribute("search", vo);
+		List<GradeVO> list = service.gradeList();
+		String json = "[";
+		for (GradeVO grade : list) {
+			json += "{\"grade_no\": \"" + grade.getGrade_no() + "\",";
+			json += "\"grade_name\": \"" + grade.getGrade_name() + "\"}";
+			if (list.iterator().hasNext())
+				json += ",";
+		}
+		json += "]";
+
+		model.addAttribute("gradeList", json);
+
+		return "member/list";
+	}
+
+	// 아이디 찾기 페이지
+	@GetMapping("/findId.do")
+	public String findIdForm() {
+		return "member/findId";
+	}
+
+	// 비밀번호 찾기 페이지
+	@GetMapping("/findPw.do")
+	public String findPwForm() {
+		return "member/findPw";
+	}
+
+	// 비밀번호 변경 처리
+	@PostMapping("/changePw.do")
+	public String changePw(MemberVO vo, RedirectAttributes rttr) {
+		Integer result = 0;
+		result = service.changePw(vo);
+		if (result == 1) {
+			rttr.addFlashAttribute("msg", "비밀번호가 변경되었습니다");
+		} else {
+			rttr.addFlashAttribute("msg", "비밀번호 변경에 실패했습니다");
+		}
+		return "redirect:/member/login.do";
+	}
+
+	// 회원탈퇴 페이지
+	@GetMapping("/withdrawals.do")
+	public String withdrawalsForm() {
+		return "member/withdrawals";
+	}
+
+	// 회원탈퇴 처리
+	@PostMapping("/withdrawals.do")
+	public String withdrawals(HttpSession session, RedirectAttributes rttr) {
+		LoginVO vo = (LoginVO) session.getAttribute("login");
+		if (vo != null) {
+			Integer result = service.withdrawals(vo.getId());
+			if (result == 1) {
+				session.removeAttribute("login");
+				rttr.addFlashAttribute("msg", "회원탈퇴가 되었습니다");
+			} else {
+				rttr.addFlashAttribute("msg", "회원탈퇴 중 오류가 발생하였습니다");
+			}
+		}
+
+		return "redirect:/main.do";
+	}
+	
+	// 회원 비밀번호 변경
+	@GetMapping("/changePw.do")
+	public String changePw() {
+		return "member/changePw";
+	}
+
+}

@@ -1,0 +1,22 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>판매자 마이페이지</title>
+<link rel="stylesheet" href="/resources/css/member.css">
+</head>
+<body>
+	<div id="box-large">
+		${vo.company_no }
+		${vo.id }
+		${vo.company_name }
+		${vo.company_tel }
+		${vo.company_addr }
+		${vo.company_detail_addr }
+		${vo.company_bank }
+		${vo.company_account }
+	</div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="pageNav" tagdir="/WEB-INF/tags" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>상품리뷰 리스트</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+  
+  <style type="text/css">
+  	.dataRow:hover{
+  		cursor: pointer;
+  		background: #dddddd;
+  	}
+table {
+  width : 300px;
+  height : 200px;
+}
+th, td {
+  text-align: center;
+}
+  	
+  </style>
+  
+  <script type="text/javascript">
+	$(function(){
+
+		// 검색(key, word-input.value) & perPageNum 데이터 세팅
+		$("#perPageNum").val("${pageObject.perPageNum}");
+		
+		// 이벤트 처리
+		$(".dataRow").click(function(){
+			let no = $(this).find(".no").text();
+			location = "view.do?no=" + no;
+
+		});
+
+		$("#perPageNum").change(function(){
+			// alert("페이지당 데이터의 개수를 변경했습니다.");
+			location = "list.do?page=1&perPageNum=" + $("#perPageNum").val();
+		});
+
+		
+
+		
+	});
+  </script>
+</head>
+<body>
+<div class="container">
+<h2>상품리뷰 리스트</h2>
+
+<table class="table">
+	<tr>
+		<th>구매상품번호</th>
+		<th>번호</th>
+		<th>제목</th>
+		<th>내용</th>
+		<th>아이디</th>
+		<th>별점</th>
+		<th>작성일</th>
+	</tr>
+	<c:forEach items="${list }" var="vo">
+		<tr class="dataRow">
+			<td>${vo.item_No }</td>
+			<td class="no">${vo.reNo }</td>
+			<td>${vo.title }</td>
+			<td>${vo.content }</td>
+			<td>${vo.id}</td>
+			<td>${vo.stars} </td>   
+	<td><fmt:formatDate value="${vo.reviewDate}" pattern="yyyy-MM-dd"/></td>
+		</tr>
+	</c:forEach>
+	
+</table>
+</div>
+<div><pageNav:pageNav listURI="list.do" pageObject="${pageObject }"></pageNav:pageNav></div>
+<a href="write.do?perPageNum=${pageObject.perPageNum }" class="btn btn-default">등록</a>
+</body>
+</html>
